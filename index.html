@@ -227,7 +227,7 @@
             border: 1px solid #e2e8f0;
         }
         .min-value {
-            font-size: 2.4rem;
+            font-size: 2.8rem;
             font-weight: 700;
             color: #0f172a;
             line-height: 1.2;
@@ -284,15 +284,13 @@
         根据输入数字格式（是否含小数点）自动选择 int/double。方法一使用重载，方法二使用模板（自动推导类型）。
     </div>
     <div class="code-note">
-        // 原始C++逻辑<br>
-        i程序应用的两种方法：
-        （1）函数原型：
+        程序应用的两种方法：
+        （1）函数原型：原始C++逻辑<br>
             int* findmin(int* minIndex, int a[], int size=10);<br>
             double* findmin(int* minIndex, double a[], int size=10);<br>
-        （2）函数模板原型：
+        （2）函数模板原型：模板根据实参类型自动实例化为 int 或 double
             template&lt;typename T&gt; 
             T* findmin(int* minIndex, T a[], int size=10);
-        // 方法二模板根据实参类型自动实例化为 int 或 double
     </div>
 
     <div class="input-area">
