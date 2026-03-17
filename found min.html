@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>可视化：数组最小值查找（基于C++重载与模板）</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #f5f7fa 0%, #e9ecf0 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .card {
+            max-width: 780px;
+            width: 100%;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.6);
+            padding: 30px 28px;
+            border: 1px solid rgba(255,255,255,0.5);
+            transition: all 0.2s ease;
+        }
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: #1e293b;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h1 span {
+            background: #334155;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 400;
+            padding: 4px 14px;
+            border-radius: 40px;
+            letter-spacing: normal;
+        }
+        .sub {
+            color: #475569;
+            font-size: 0.95rem;
+            margin: 0 0 24px 0;
+            border-left: 4px solid #3b82f6;
+            padding-left: 18px;
+            background: rgba(59,130,246,0.06);
+            border-radius: 0 12px 12px 0;
+            line-height: 1.5;
+        }
+        .code-note {
+            background: #1e293b;
+            color: #b9c7da;
+            padding: 12px 18px;
+            border-radius: 24px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            margin: 10px 0 22px 0;
+            border: 1px solid #3b4a5f;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            box-shadow: inset 0 2px 5px #0f172a;
+        }
+        .input-area {
+            background: white;
+            border-radius: 32px;
+            padding: 18px 22px;
+            box-shadow: 0 8px 18px -6px rgba(0,0,0,0.1), inset 0 1px 0 #ffffff;
+            border: 1px solid #d1d9e6;
+            margin-bottom: 28px;
+        }
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .label-row label {
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 1.1rem;
+        }
+        .badge {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 5px 12px;
+            border-radius: 26px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        #arrayInput {
+            flex: 1;
+            padding: 16px 20px;
+            border: none;
+            background: #f1f5f9;
+            border-radius: 48px;
+            font-size: 1rem;
+            border: 2px solid transparent;
+            transition: 0.15s;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.03);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        #arrayInput:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.2);
+        }
+        #arrayInput::placeholder {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+        #calcBtn {
+            background: #1e293b;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0 32px;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.15s;
+            letter-spacing: 0.3px;
+            border: 1px solid #3b4a5f;
+            box-shadow: 0 10px 15px -8px #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        #calcBtn:hover {
+            background: #2d3b4f;
+            transform: scale(1.02);
+            box-shadow: 0 15px 20px -10px #0b1622;
+        }
+        #calcBtn:active {
+            transform: scale(0.98);
+        }
+        .error-panel {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 14px 20px;
+            border-radius: 30px;
+            margin-top: 20px;
+            font-weight: 500;
+            border: 1px solid #fecaca;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+        }
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 28px;
+        }
+        .method-card {
+            background: white;
+            border-radius: 28px;
+            padding: 22px 22px 24px;
+            box-shadow: 0 12px 25px -16px #1e293b;
+            border: 1px solid #dee7f2;
+            transition: all 0.2s;
+        }
+        .method-card:hover {
+            border-color: #a5c0e0;
+            box-shadow: 0 22px 30px -18px #1e3a5f;
+        }
+        .method-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px dashed #cbd5e1;
+            padding-bottom: 16px;
+            margin-bottom: 18px;
+        }
+        .method-icon {
+            background: #3b82f6;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .method-name {
+            font-weight: 650;
+            font-size: 1.3rem;
+            color: #0f172a;
+        }
+        .method-type {
+            font-size: 0.85rem;
+            background: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 30px;
+            color: #334155;
+            margin-left: auto;
+            font-weight: 500;
+        }
+        .value-box {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 18px 20px;
+            border: 1px solid #e2e8f0;
+        }
+        .min-value {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+        .index-badge {
+            background: #3b82f6;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 36px;
+            font-weight: 500;
+            font-size: 1rem;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .meta-note {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-top: 16px;
+            border-top: 1px solid #d9e2ef;
+            padding-top: 16px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .footnote {
+            text-align: center;
+            margin-top: 32px;
+            color: #4b5a71;
+            font-size: 0.85rem;
+            background: rgba(0,0,0,0.02);
+            padding: 12px;
+            border-radius: 50px;
+        }
+        .separator {
+            color: #94a3b8;
+            font-weight: 300;
+            padding: 0 6px;
+        }
+        @media (max-width: 600px) {
+            .result-grid { grid-template-columns: 1fr; }
+            .input-wrapper { flex-direction: column; }
+            #calcBtn { justify-content: center; padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>
+        🔍 寻找最小值
+        <span>C++重载+模板</span>
+    </h1>
+    <div class="sub">
+        基于您提供的代码：重载findmin (int/double) 与模板版本。输入数字串，模拟类型推导与最小值查找。
+    </div>
+    <div class="code-note">
+        // 原始C++逻辑 (简化示意)<br>
+        int* findmin(int* minIndex, int a[], int size=10);<br>
+        double* findmin(int* minIndex, double a[], int size=10);<br>
+        template&lt;typename T&gt; T* findmin(int* minIndex, T a[], int size=10);
+    </div>
+
+    <div class="input-area">
+        <div class="label-row">
+            <label for="arrayInput">📋 输入数组 (0~10个数，空格分隔)</label>
+            <span class="badge">最多10个元素</span>
+        </div>
+        <div class="input-wrapper">
+            <input type="text" id="arrayInput" placeholder="例: 3.5  2   -1   7.2  0" value="3.5 2 -1 7.2 0">
+            <button id="calcBtn">⚡ 查找最小值</button>
+        </div>
+        <div id="errorMessage" class="error-panel" style="display: none;">⚠️</div>
+    </div>
+
+    <!-- 结果展示：两个方法卡片 -->
+    <div class="result-grid" id="resultGrid">
+        <!-- 方法一：根据小数点选择 int/double 版本 -->
+        <div class="method-card">
+            <div class="method-header">
+                <div class="method-icon">①</div>
+                <div class="method-name">重载版本</div>
+                <div class="method-type" id="method1Type">int / double</div>
+            </div>
+            <div class="value-box">
+                <div style="font-size:0.9rem; color:#475569; margin-bottom:6px;">最小值</div>
+                <div class="min-value" id="method1Value">—</div>
+                <div class="index-badge" id="method1Index">索引  —</div>
+                <div class="meta-note">
+                    <span>📌 推导: <span id="method1Dispatch">未调用</span></span>
+                </div>
+            </div>
+        </div>
+        <!-- 方法二：模板 float 版本 (统一浮点) -->
+        <div class="method-card">
+            <div class="method-header">
+                <div class="method-icon">②</div>
+                <div class="method-name">模板版本</div>
+                <div class="method-type">float (统一)</div>
+            </div>
+            <div class="value-box">
+                <div style="font-size:0.9rem; color:#475569; margin-bottom:6px;">最小值</div>
+                <div class="min-value" id="method2Value">—</div>
+                <div class="index-badge" id="method2Index">索引  —</div>
+                <div class="meta-note">
+                    <span>⚙️ 实例化: findmin&lt;float&gt;</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footnote">
+        ⬤ 方法一：若所有数字均为整数格式(如 -5, 42) 则调用 <strong>int版本</strong>，否则调用 <strong>double版本</strong> (含小数点/科学记数)<br>
+        ⬤ 方法二：统一视为float数组调用模板，模拟C++模板实例化。
+    </div>
+</div>
+
+<script>
+    (function() {
+        // DOM 元素
+        const inputField = document.getElementById('arrayInput');
+        const calcBtn = document.getElementById('calcBtn');
+        const errorDiv = document.getElementById('errorMessage');
+        const method1Value = document.getElementById('method1Value');
+        const method1Index = document.getElementById('method1Index');
+        const method1Type = document.getElementById('method1Type');
+        const method1Dispatch = document.getElementById('method1Dispatch');
+        const method2Value = document.getElementById('method2Value');
+        const method2Index = document.getElementById('method2Index');
+
+        // ---------- 三个核心函数 (模拟C++指针返回, 通过索引数组传出) ----------
+        // 所有函数接受 minIndex (长度为1的数组, 用于回传索引), arr, size; 返回最小值(或null)
+        function findminInt(minIndex, arr, size) {
+            if (size <= 0 || !arr || arr.length === 0) return null;
+            let minIdx = 0;
+            for (let i = 1; i < size; i++) {
+                if (arr[i] < arr[minIdx]) {
+                    minIdx = i;
+                }
+            }
+            minIndex[0] = minIdx;
+            return arr[minIdx];
+        }
+
+        function findminDouble(minIndex, arr, size) {
+            // double版本完全一样，但保留以模拟重载
+            if (size <= 0 || !arr || arr.length === 0) return null;
+            let minIdx = 0;
+            for (let i = 1; i < size; i++) {
+                if (arr[i] < arr[minIdx]) {
+                    minIdx = i;
+                }
+            }
+            minIndex[0] = minIdx;
+            return arr[minIdx];
+        }
+
+        // 模板版本: 统一当作float处理 (其实比较逻辑相同, 但保留以示区分)
+        function findminTemplate(minIndex, arr, size) {
+            if (size <= 0 || !arr || arr.length === 0) return null;
+            let minIdx = 0;
+            for (let i = 1; i < size; i++) {
+                // 使用严格浮点比较，与原代码模板一致
+                if (arr[i] < arr[minIdx]) {
+                    minIdx = i;
+                }
+            }
+            minIndex[0] = minIdx;
+            return arr[minIdx];
+        }
+
+        // ---------- 解析与类型判断 ----------
+        function parseInputAndCompute(inputStr) {
+            // 1. 清理首尾空格，按空白符分割
+            const trimmed = inputStr.trim();
+            if (trimmed === '') {
+                throw new Error('输入不能为空');
+            }
+
+            // 分割并过滤掉空字符串
+            const tokens = trimmed.split(/\s+/).filter(t => t.length > 0);
+            if (tokens.length === 0) {
+                throw new Error('没有有效的数字');
+            }
+            if (tokens.length > 10) {
+                throw new Error('数组长度超过10，不符合要求 (0~10)');
+            }
+
+            // 2. 检查每个token是否为合法数字，并收集数值；同时判断是否为整数字面量(不含小数点/指数)
+            const numbers = [];
+            let hasFloatToken = false;   // 只要有一个token不是纯整数格式(小数点或e等)即为浮点数组
+
+            for (let token of tokens) {
+                // 尝试转换为数字
+                const num = Number(token);
+                if (isNaN(num)) {
+                    throw new Error(`无效数字: "${token}"`);
+                }
+
+                // 判断是否纯整数格式: 可选正负号 + 至少一位数字 (不包含小数点、指数)
+                // 科学计数法如 1e-3 不符合此正则 → 视为浮点
+                const isIntegerToken = /^[+-]?\d+$/.test(token);
+                if (!isIntegerToken) {
+                    hasFloatToken = true;
+                }
+
+                numbers.push(num);
+            }
+
+            // 注意：原代码中方法一根据是否有小数点选择int[]或double[]。
+            // 这里我们使用 hasFloatToken 决定调用哪个重载。
+            // 方法二始终调用模板(float版本)，使用numbers数组 (JS number双精度，但概念上模拟float)
+            const size = numbers.length;
+
+            // 存放索引的容器 (模拟指针)
+            const idxOut = [0];
+
+            // ----- 方法一执行 (重载) -----
+            let method1Result, method1Idx;
+            let usedType = '';
+            if (!hasFloatToken) {
+                // 所有数字均为整数字面量 → 调用 int 版本 (但注意数值可能超出int范围，但JS不care，展示为整数格式)
+                usedType = 'int';
+                method1Result = findminInt(idxOut, numbers, size);
+                method1Idx = idxOut[0];
+            } else {
+                // 存在浮点格式 → 调用 double 版本
+                usedType = 'double';
+                method1Result = findminDouble(idxOut, numbers, size);
+                method1Idx = idxOut[0];
+            }
+
+            // ----- 方法二执行 (模板 float) -----
+            const idxOut2 = [0];
+            const method2Result = findminTemplate(idxOut2, numbers, size);
+            const method2Idx = idxOut2[0];
+
+            return {
+                numbers: numbers,
+                tokens: tokens,
+                hasFloat: hasFloatToken,
+                method1: { value: method1Result, index: method1Idx, type: usedType },
+                method2: { value: method2Result, index: method2Idx }
+            };
+        }
+
+        // ---------- 更新UI ----------
+        function updateDisplay() {
+            // 隐藏旧错误
+            errorDiv.style.display = 'none';
+            const inputStr = inputField.value;
+
+            try {
+                const result = parseInputAndCompute(inputStr);
+
+                // 更新方法一
+                if (result.method1.value !== null && result.method1.value !== undefined) {
+                    method1Value.innerText = result.method1.value;
+                    method1Index.innerText = `索引 ${result.method1.index}`;
+                    // 显示类型推导
+                    method1Type.innerText = result.hasFloat ? 'double' : 'int';
+                    method1Dispatch.innerText = result.hasFloat ? 'double 重载' : 'int 重载';
+                } else {
+                    method1Value.innerText = '—';
+                    method1Index.innerText = '索引 —';
+                    method1Type.innerText = '—';
+                    method1Dispatch.innerText = '未调用';
+                }
+
+                // 更新方法二 (模板float)
+                if (result.method2.value !== null && result.method2.value !== undefined) {
+                    method2Value.innerText = result.method2.value;
+                    method2Index.innerText = `索引 ${result.method2.index}`;
+                } else {
+                    method2Value.innerText = '—';
+                    method2Index.innerText = '索引 —';
+                }
+
+                // 附加一个小细节：如果两种方法结果/索引不同(极少情况，但由于JS精度相同不会)，但保留显示
+                // 还可以在卡片下显示数组元素个数
+                const metaNote1 = document.querySelector('.method-card:first-child .meta-note');
+                // 可额外显示数组原始格式，但保持简洁
+                const originalArrStr = result.numbers.map((v, i) => `${v}`).join(', ');
+                // 动态添加信息
+                if (!document.getElementById('dynamicArrayInfo')) {
+                    // 简单加一行小提示，避免破坏结构
+                }
+            } catch (e) {
+                // 显示错误
+                errorDiv.style.display = 'flex';
+                errorDiv.innerHTML = `⚠️ ${e.message}`;
+                // 清空结果
+                method1Value.innerText = '—';
+                method1Index.innerText = '索引 —';
+                method1Type.innerText = '—';
+                method1Dispatch.innerText = '未调用';
+                method2Value.innerText = '—';
+                method2Index.innerText = '索引 —';
+            }
+        }
+
+        // 初始加载执行一次
+        updateDisplay();
+
+        // 绑定事件
+        calcBtn.addEventListener('click', updateDisplay);
+        inputField.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                updateDisplay();
+            }
+        });
+
+        // 附加动态显示当前数组信息(可选)
+        function updateArrayInfo() {
+            // 可以再补充一个小细节，但已经够了
+        }
+    })();
+</script>
+<!-- 增加一点数组信息展示：在卡片下面动态显示当前解析的数组 -->
+<div style="max-width:780px; margin: 12px auto 0; padding-left: 16px; font-size:0.9rem; color:#475569;">
+    当前解析数组: <span id="liveArrayPreview" style="font-family: monospace; background: #f1f4f9; padding: 6px 14px; border-radius: 50px;">—</span>
+</div>
+<script>
+    (function livePreview() {
+        const previewSpan = document.getElementById('liveArrayPreview');
+        const input = document.getElementById('arrayInput');
+        function updatePreview() {
+            try {
+                const str = input.value.trim();
+                if (!str) { previewSpan.innerText = '— 空 —'; return; }
+                const tokens = str.split(/\s+/).filter(t => t.length > 0).slice(0, 10);
+                if (tokens.length === 0) { previewSpan.innerText = '— 无数字 —'; return; }
+                const nums = tokens.map(t => Number(t)).filter(n => !isNaN(n));
+                if (nums.length === 0) { previewSpan.innerText = '— 无效数字 —'; return; }
+                previewSpan.innerText = '[ ' + nums.join(' , ') + ' ]' + (nums.length > 10 ? ' ...' : '');
+            } catch (e) {
+                previewSpan.innerText = '— 解析中 —';
+            }
+        }
+        input.addEventListener('input', updatePreview);
+        updatePreview();
+        // 也关联计算按钮的更新
+        document.getElementById('calcBtn').addEventListener('click', function() {
+            setTimeout(updatePreview, 10);
+        });
+    })();
+</script>
+</body>
+</html>
