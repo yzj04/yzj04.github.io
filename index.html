@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>可视化：数组最小值查找（基于C++重载与模板）</title>
+    <title>可视化：数组最小值查找</title>
     <style>
         * {
             box-sizing: border-box;
@@ -278,16 +278,21 @@
 <div class="card">
     <h1>
         🔍 寻找最小值
-        <span>C++重载+模板</span>
+        <span>模板自动类型推导</span>
     </h1>
     <div class="sub">
-        基于您提供的代码：重载findmin (int/double) 与模板版本。输入数字串，模拟类型推导与最小值查找。
+        根据输入数字格式（是否含小数点）自动选择 int/double。方法一使用重载，方法二使用模板（自动推导类型）。
     </div>
     <div class="code-note">
-        // 原始C++逻辑 (简化示意)<br>
-        int* findmin(int* minIndex, int a[], int size=10);<br>
-        double* findmin(int* minIndex, double a[], int size=10);<br>
-        template&lt;typename T&gt; T* findmin(int* minIndex, T a[], int size=10);
+        // 原始C++逻辑<br>
+        i程序应用的两种方法：
+        （1）函数原型：
+            int* findmin(int* minIndex, int a[], int size=10);<br>
+            double* findmin(int* minIndex, double a[], int size=10);<br>
+        （2）函数模板原型：
+            template&lt;typename T&gt; 
+            T* findmin(int* minIndex, T a[], int size=10);
+        // 方法二模板根据实参类型自动实例化为 int 或 double
     </div>
 
     <div class="input-area">
@@ -304,7 +309,7 @@
 
     <!-- 结果展示：两个方法卡片 -->
     <div class="result-grid" id="resultGrid">
-        <!-- 方法一：根据小数点选择 int/double 版本 -->
+        <!-- 方法一：根据小数点选择 int/double 重载版本 -->
         <div class="method-card">
             <div class="method-header">
                 <div class="method-icon">①</div>
@@ -320,26 +325,26 @@
                 </div>
             </div>
         </div>
-        <!-- 方法二：模板 float 版本 (统一浮点) -->
+        <!-- 方法二：模板版本 (自动推导 int/double) -->
         <div class="method-card">
             <div class="method-header">
                 <div class="method-icon">②</div>
                 <div class="method-name">模板版本</div>
-                <div class="method-type">float (统一)</div>
+                <div class="method-type" id="method2Type">自动推导</div>
             </div>
             <div class="value-box">
                 <div style="font-size:0.9rem; color:#475569; margin-bottom:6px;">最小值</div>
                 <div class="min-value" id="method2Value">—</div>
                 <div class="index-badge" id="method2Index">索引  —</div>
                 <div class="meta-note">
-                    <span>⚙️ 实例化: findmin&lt;float&gt;</span>
+                    <span>⚙️ 实例化: <span id="method2Dispatch">findmin&lt;int/double&gt;</span></span>
                 </div>
             </div>
         </div>
     </div>
     <div class="footnote">
         ⬤ 方法一：若所有数字均为整数格式(如 -5, 42) 则调用 <strong>int版本</strong>，否则调用 <strong>double版本</strong> (含小数点/科学记数)<br>
-        ⬤ 方法二：统一视为float数组调用模板，模拟C++模板实例化。
+        ⬤ 方法二：模板根据输入格式自动实例化为 <strong>int</strong> 或 <strong>double</strong>，不再固定 float。
     </div>
 </div>
 
@@ -355,9 +360,10 @@
         const method1Dispatch = document.getElementById('method1Dispatch');
         const method2Value = document.getElementById('method2Value');
         const method2Index = document.getElementById('method2Index');
+        const method2Type = document.getElementById('method2Type');
+        const method2Dispatch = document.getElementById('method2Dispatch');
 
         // ---------- 三个核心函数 (模拟C++指针返回, 通过索引数组传出) ----------
-        // 所有函数接受 minIndex (长度为1的数组, 用于回传索引), arr, size; 返回最小值(或null)
         function findminInt(minIndex, arr, size) {
             if (size <= 0 || !arr || arr.length === 0) return null;
             let minIdx = 0;
@@ -371,7 +377,6 @@
         }
 
         function findminDouble(minIndex, arr, size) {
-            // double版本完全一样，但保留以模拟重载
             if (size <= 0 || !arr || arr.length === 0) return null;
             let minIdx = 0;
             for (let i = 1; i < size; i++) {
@@ -383,12 +388,11 @@
             return arr[minIdx];
         }
 
-        // 模板版本: 统一当作float处理 (其实比较逻辑相同, 但保留以示区分)
+        // 模板版本：完全通用（int/double 共用同一逻辑）
         function findminTemplate(minIndex, arr, size) {
             if (size <= 0 || !arr || arr.length === 0) return null;
             let minIdx = 0;
             for (let i = 1; i < size; i++) {
-                // 使用严格浮点比较，与原代码模板一致
                 if (arr[i] < arr[minIdx]) {
                     minIdx = i;
                 }
@@ -399,13 +403,11 @@
 
         // ---------- 解析与类型判断 ----------
         function parseInputAndCompute(inputStr) {
-            // 1. 清理首尾空格，按空白符分割
             const trimmed = inputStr.trim();
             if (trimmed === '') {
                 throw new Error('输入不能为空');
             }
 
-            // 分割并过滤掉空字符串
             const tokens = trimmed.split(/\s+/).filter(t => t.length > 0);
             if (tokens.length === 0) {
                 throw new Error('没有有效的数字');
@@ -414,19 +416,15 @@
                 throw new Error('数组长度超过10，不符合要求 (0~10)');
             }
 
-            // 2. 检查每个token是否为合法数字，并收集数值；同时判断是否为整数字面量(不含小数点/指数)
             const numbers = [];
-            let hasFloatToken = false;   // 只要有一个token不是纯整数格式(小数点或e等)即为浮点数组
+            let hasFloatToken = false;   // 只要有一个token不是纯整数格式即为浮点数组
 
             for (let token of tokens) {
-                // 尝试转换为数字
                 const num = Number(token);
                 if (isNaN(num)) {
                     throw new Error(`无效数字: "${token}"`);
                 }
 
-                // 判断是否纯整数格式: 可选正负号 + 至少一位数字 (不包含小数点、指数)
-                // 科学计数法如 1e-3 不符合此正则 → 视为浮点
                 const isIntegerToken = /^[+-]?\d+$/.test(token);
                 if (!isIntegerToken) {
                     hasFloatToken = true;
@@ -435,46 +433,40 @@
                 numbers.push(num);
             }
 
-            // 注意：原代码中方法一根据是否有小数点选择int[]或double[]。
-            // 这里我们使用 hasFloatToken 决定调用哪个重载。
-            // 方法二始终调用模板(float版本)，使用numbers数组 (JS number双精度，但概念上模拟float)
             const size = numbers.length;
 
-            // 存放索引的容器 (模拟指针)
-            const idxOut = [0];
-
-            // ----- 方法一执行 (重载) -----
+            // 方法一执行 (重载)
+            const idxOut1 = [0];
             let method1Result, method1Idx;
-            let usedType = '';
+            let usedType1 = '';
             if (!hasFloatToken) {
-                // 所有数字均为整数字面量 → 调用 int 版本 (但注意数值可能超出int范围，但JS不care，展示为整数格式)
-                usedType = 'int';
-                method1Result = findminInt(idxOut, numbers, size);
-                method1Idx = idxOut[0];
+                usedType1 = 'int';
+                method1Result = findminInt(idxOut1, numbers, size);
+                method1Idx = idxOut1[0];
             } else {
-                // 存在浮点格式 → 调用 double 版本
-                usedType = 'double';
-                method1Result = findminDouble(idxOut, numbers, size);
-                method1Idx = idxOut[0];
+                usedType1 = 'double';
+                method1Result = findminDouble(idxOut1, numbers, size);
+                method1Idx = idxOut1[0];
             }
 
-            // ----- 方法二执行 (模板 float) -----
+            // 方法二执行 (模板，根据hasFloat决定实例化类型)
             const idxOut2 = [0];
+            // 注意：模板函数本身与类型无关，我们仍传入numbers（JS number），但为了模拟类型实例化，
+            // 我们根据hasFloat记录不同的类型名称，但比较逻辑不变（因为最小值相同）
             const method2Result = findminTemplate(idxOut2, numbers, size);
             const method2Idx = idxOut2[0];
+            const usedType2 = hasFloatToken ? 'double' : 'int';   // 模板实例化类型
 
             return {
                 numbers: numbers,
-                tokens: tokens,
                 hasFloat: hasFloatToken,
-                method1: { value: method1Result, index: method1Idx, type: usedType },
-                method2: { value: method2Result, index: method2Idx }
+                method1: { value: method1Result, index: method1Idx, type: usedType1 },
+                method2: { value: method2Result, index: method2Idx, type: usedType2 }
             };
         }
 
         // ---------- 更新UI ----------
         function updateDisplay() {
-            // 隐藏旧错误
             errorDiv.style.display = 'none';
             const inputStr = inputField.value;
 
@@ -482,10 +474,9 @@
                 const result = parseInputAndCompute(inputStr);
 
                 // 更新方法一
-                if (result.method1.value !== null && result.method1.value !== undefined) {
+                if (result.method1.value !== null) {
                     method1Value.innerText = result.method1.value;
                     method1Index.innerText = `索引 ${result.method1.index}`;
-                    // 显示类型推导
                     method1Type.innerText = result.hasFloat ? 'double' : 'int';
                     method1Dispatch.innerText = result.hasFloat ? 'double 重载' : 'int 重载';
                 } else {
@@ -495,42 +486,35 @@
                     method1Dispatch.innerText = '未调用';
                 }
 
-                // 更新方法二 (模板float)
-                if (result.method2.value !== null && result.method2.value !== undefined) {
+                // 更新方法二 (模板自动推导)
+                if (result.method2.value !== null) {
                     method2Value.innerText = result.method2.value;
                     method2Index.innerText = `索引 ${result.method2.index}`;
+                    // 显示模板实例化类型
+                    method2Type.innerText = result.method2.type;
+                    method2Dispatch.innerText = `findmin<${result.method2.type}>`;
                 } else {
                     method2Value.innerText = '—';
                     method2Index.innerText = '索引 —';
-                }
-
-                // 附加一个小细节：如果两种方法结果/索引不同(极少情况，但由于JS精度相同不会)，但保留显示
-                // 还可以在卡片下显示数组元素个数
-                const metaNote1 = document.querySelector('.method-card:first-child .meta-note');
-                // 可额外显示数组原始格式，但保持简洁
-                const originalArrStr = result.numbers.map((v, i) => `${v}`).join(', ');
-                // 动态添加信息
-                if (!document.getElementById('dynamicArrayInfo')) {
-                    // 简单加一行小提示，避免破坏结构
+                    method2Type.innerText = '自动推导';
+                    method2Dispatch.innerText = '—';
                 }
             } catch (e) {
-                // 显示错误
                 errorDiv.style.display = 'flex';
                 errorDiv.innerHTML = `⚠️ ${e.message}`;
-                // 清空结果
                 method1Value.innerText = '—';
                 method1Index.innerText = '索引 —';
                 method1Type.innerText = '—';
                 method1Dispatch.innerText = '未调用';
                 method2Value.innerText = '—';
                 method2Index.innerText = '索引 —';
+                method2Type.innerText = '自动推导';
+                method2Dispatch.innerText = '—';
             }
         }
 
-        // 初始加载执行一次
         updateDisplay();
 
-        // 绑定事件
         calcBtn.addEventListener('click', updateDisplay);
         inputField.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -538,14 +522,9 @@
                 updateDisplay();
             }
         });
-
-        // 附加动态显示当前数组信息(可选)
-        function updateArrayInfo() {
-            // 可以再补充一个小细节，但已经够了
-        }
     })();
 </script>
-<!-- 增加一点数组信息展示：在卡片下面动态显示当前解析的数组 -->
+<!-- 实时显示解析数组 -->
 <div style="max-width:780px; margin: 12px auto 0; padding-left: 16px; font-size:0.9rem; color:#475569;">
     当前解析数组: <span id="liveArrayPreview" style="font-family: monospace; background: #f1f4f9; padding: 6px 14px; border-radius: 50px;">—</span>
 </div>
@@ -568,7 +547,6 @@
         }
         input.addEventListener('input', updatePreview);
         updatePreview();
-        // 也关联计算按钮的更新
         document.getElementById('calcBtn').addEventListener('click', function() {
             setTimeout(updatePreview, 10);
         });
